@@ -1,4 +1,4 @@
-import sys, socket, getopt
+import sys, socket
 
 from ramen import Ramen
 
@@ -12,4 +12,4 @@ class Bowl:
         self.tellfile = tellfile
 
     def connect(self):
-        #stuff
+        ircsock = 
