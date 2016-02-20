@@ -1,0 +1,8 @@
+--login
+nick: ramenbot
+host: irc.sushigirl.tokyo
+port: 6667
+channel: #test
+
+--files
+tellfile: ~/.sushibot/
