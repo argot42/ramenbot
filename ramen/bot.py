@@ -2,7 +2,7 @@ import sys
 import getopt
 
 from bowl import Bowl
-from auxfun import usage, check
+from auxfun import usage, check, complete_missing
 
 __version__ = "0.1"
 
@@ -78,17 +78,22 @@ except FileNotFoundError as err:
 
 else:
     for line in fd:
-        parts = line.split(': ')
+        parts = str.strip(line).split(': ')
         
         if parts[0] == 'nick':
             if not bot_configuration["nick"][1] and check(parts[1], "nick"): 
                 bot_configuration["nick"][0] = str.encode(parts[1], 'utf-8')
                 bot_configuration["nick"][1] = True
 
-        elif parts[0] == 'host':
+        elif parts[0] == 'realname':
             if not bot_configuration["realname"][1] and check(parts[1], "realname"): 
                 bot_configuration["realname"][0] = str.encode(parts[1], 'utf-8')
                 bot_configuration["realname"][1] = True
+
+        elif parts[0] == 'host':
+            if not bot_configuration["host"][1] and check(parts[1], "host"):
+                bot_configuration["host"][0] = parts[1]
+                bot_configuration["host"][1] = True
 
         elif parts[0] == 'port':
             if not bot_configuration["port"][1] and check(parts[1], "port"): 
@@ -107,15 +112,14 @@ else:
 
 
 # Complete mandatory config info
-for n, d in bot_configuration.items():
-    if not d[1]:
-        tmp = input("%s: " % n)
-
-        if check(tmp, n):
-            bot_configuration[n][0] = tmp
-
+complete_missing(bot_configuration)
+print(bot_configuration)
 
 bowl = Bowl(bot_configuration["host"][0], bot_configuration["port"][0], bot_configuration["nick"][0],\
         bot_configuration["realname"][0], bot_configuration["channel"][0], bot_configuration["tellfile"][0])
 
-bowl.connect()
+try:
+    bowl.connect()
+
+except:
+    raise
