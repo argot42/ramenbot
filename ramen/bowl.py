@@ -38,11 +38,12 @@ class Bowl:
                 if not line:
                     continue
 
-                # parse recieved msg
+                # parse recieved msg and return a list with responses
                 response = Ramen.parse(line, parser_info)
 
                 # if response not null send it
                 if not response:
                     continue
 
-                ircsock.send(response)
+                for msg in response:
+                    ircsock.send(msg)
