@@ -4,8 +4,6 @@ import getopt
 from bowl import Bowl
 from auxfun import usage, check, complete_missing
 
-__version__ = "0.1"
-
 try:
     opts, args = getopt.getopt(sys.argv[1:], "Hvf:h:p:n:r:c:t:", ["help", "version", "config=", "host=", "port=", "nick=", "realname=", "channel=", "tellfile="])
 

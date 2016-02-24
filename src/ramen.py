@@ -1,5 +1,7 @@
 import re
 
+__version__ = "0.1"
+
 class Ramen:
     def parse(msg_content, parser_info):
         msg_content = str.rstrip(msg_content)
@@ -17,7 +19,6 @@ class Ramen:
         elif len(msg_splited) > 3:
             # obtain sender nickname
             matched = re.match(':(?P<sender_nick>\w+)!', msg_splited[0])
-
             if not matched:
                 return None
             parser_info['sender_nick'] = matched.group('sender_nick')
@@ -25,10 +26,18 @@ class Ramen:
             # receiver be user or channel
             parser_info['receiver'] = msg_splited[2]
 
-            # check if msg is a command or not
-            if msg_splited[3][0:2] == ':.':
-                return Ramen.resolv_com(parser_info, msg_splited[3:])
+            # check msg type
+            if msg_splited[1] == "JOIN":
+                Ramen.log_join(info)
+                return None
 
+            elif msg_splited[1] == "PRIVMSG":
+                # check if msg is a command or not
+                if msg_splited[3][0:2] == ':.':
+                    return Ramen.resolv_com(parser_info, msg_splited[3:])
+                else:
+                    return None
+                    #Ramen.tell_check(info)
 
 
     def pong(pong_string):
@@ -51,10 +60,10 @@ class Ramen:
             return Ramen.help(info, com[1:])
 
         elif comid == 'tell':
-            print("TELL")
+            return Ramen.tell(info, com[1:])
 
         elif comid == 'lastseen':
-            print("LAST")
+            return Ramen.lastseen(info, com[1:])
 
         elif comid == 'source':
             return Ramen.source(info)
@@ -86,4 +95,16 @@ class Ramen:
 
 
     def source(info):
-        return [b'PRIVMSG %b https:github.com/argot42/ramenbot.git\r\n' % (str.encode(info['sender_nick'], 'utf-8'))]
+        return [b'PRIVMSG %b ramenbot v%b [https://github.com/argot42/ramenbot.git]\r\n' % (str.encode(info['sender_nick'], 'utf-8'), str.encode(__version__, 'utf-8'))]
+
+
+    def tell(info, args):
+        return None
+
+
+    def lastseen(info, args):
+        return None
+
+
+    def log_join(info):
+                
