@@ -29,11 +29,8 @@ class Bowl:
             readbuffer = str()
             readbuffer = readbuffer + ircsock.recv(1024).decode('utf-8')
             temp = readbuffer.split('\n')
-            print(temp)
 
             for line in temp:
-                t = str.rstrip(line)
-                t = str.split(t)
 
                 if not line:
                     continue
