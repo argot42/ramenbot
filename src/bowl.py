@@ -1,6 +1,9 @@
 import sys, socket
+from os.path import expanduser, isfile
 
 from ramen import Ramen
+from chopsticks import Chopsticks
+from sqlite3 import OperationalError
 
 class Bowl:
     def __init__(self, host, port, nick, realname, channel, tellfile):
@@ -9,7 +12,19 @@ class Bowl:
         self.nick = nick
         self.realname = realname
         self.channel = channel
-        self.tellfile = tellfile
+        self.tellfile = expanduser(tellfile)
+
+        # if file exist do nothing
+        if isfile(self.tellfile):
+            return
+
+        # if not
+        # creating tellfile.db
+        chop = Chopsticks(self.tellfile)
+
+        # setup db table structure
+        chop.setup(["CREATE TABLE user(id_user INTEGER PRIMARY KEY NOT NULL, nickname TEXT UNIQUE, lastseen INTEGER)", "CREATE TABLE msg(id_msg INTEGER PRIMARY KEY NOT NULL, body TEXT, sender_id INTEGER NOT NULL, receiver_id INTEGER NOT NULL, FOREIGN KEY(sender_id) REFERENCES user(id_user), FOREIGN KEY(receiver_id) REFERENCES user(id_user))"])
+
 
     def connect(self):
         # connect to server

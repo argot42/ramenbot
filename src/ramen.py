@@ -1,6 +1,5 @@
 import re
-
-__version__ = "0.1"
+from rutils import __version__
 
 class Ramen:
     def parse(msg_content, parser_info):
@@ -27,9 +26,9 @@ class Ramen:
 
 
         # list of users in the channel
-        matched = re.match(r'.+ = %s :%s((?: (?:\w+))*)' % (parser_info['channel'], parser_info['nick']), msg_content)
+        matched = re.match(r'.+ = %s :%s((?: (?:(?:%%|~|&|@|\+)\w+|\w+))*)' % (parser_info['channel'], parser_info['nick']), msg_content)
         if matched:
-            Ramen.log_join(matched.group(1)[1:].split(' ')) 
+            Ramen.log_join(parser_info, matched.group(1)[1:].split(' ')) 
 
 
     def pong(pong_string):
@@ -101,5 +100,5 @@ class Ramen:
         return None
 
 
-    def log_join(info):
+    def log_join(info, users):
         print('USERS ->', info)

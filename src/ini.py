@@ -1,11 +1,12 @@
 import sys
 import getopt
+from os.path import expanduser
 
 from bowl import Bowl
-from auxfun import usage, check, complete_missing
+from rutils import usage, check, complete_missing, __version__
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "Hvf:h:p:n:r:c:t:", ["help", "version", "config=", "host=", "port=", "nick=", "realname=", "channel=", "tellfile="])
+    opts, args = getopt.getopt(sys.argv[1:], "hvf:H:p:n:r:c:t:", ["help", "version", "config=", "host=", "port=", "nick=", "realname=", "channel=", "tellfile="])
 
 except getopt.GetoptError as err:
     usage()
@@ -13,7 +14,7 @@ except getopt.GetoptError as err:
     sys.argv(2)
 
 # where configuration will be located
-config_file_path = '~/.ramenbot/ramen.rc'
+config_file_path = '~/.ramenbot/ramenrc'
 # bot configuration dictionary <config_name>: [<value>, <command_line_flag>]
 bot_configuration = \
     {'host': [str(), False],
@@ -21,11 +22,11 @@ bot_configuration = \
         'nick': [b'', False],
         'realname': [b'', False],
         'channel': [b'', False],
-        'tellfile': ['~/.ramenbot/tell', False]
+        'tellfile': ['~/.ramenbot/tellfile.db', False]
     }
 
 for option, argument in opts:
-    if option in ("-H", "--help"):
+    if option in ("-h", "--help"):
         usage()
         sys.exit()
 
@@ -36,7 +37,7 @@ for option, argument in opts:
     elif option in ("-f", "--config"):
         config_file_path = argument
 
-    elif option in ("-h", "--host"):
+    elif option in ("-H", "--host"):
         if check(bot_configuration["host"], "host"):
             bot_configuration["host"][0] = argument
             bot_configuration["host"][1] = True
@@ -63,13 +64,13 @@ for option, argument in opts:
 
     elif option in ("-t", "--tellfile"):
         if check(bot_configuration["tellfile"], "tellfile"):
-            bot_configuration["tellfile"][0] = argument
+            bot_configuration["tellfile"][0] = argument + '/tellfile.db'
             bot_configuration["tellfile"][1] = True
 
     
 # reading config file
 try:
-    fd = open(config_file_path, 'r')
+    fd = open(expanduser(config_file_path), 'r')
 
 except FileNotFoundError as err:
     print("Configuration file not found")
@@ -105,7 +106,7 @@ else:
 
         elif parts[0] == 'tellfile':
             if not bot_configuration["tellfile"][1] and check(parts[1], "tellfile"): 
-                bot_configuration["tellfile"][0] = parts[1]
+                bot_configuration["tellfile"][0] = parts[1] + '/tellfile.db'
                 bot_configuration["tellfile"][1] = True
 
 
