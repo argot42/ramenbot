@@ -46,3 +46,30 @@ class Chopsticks:
             data = data[0]
 
         return data
+
+
+    def storemsg(self, sender, receiver, body, ispriv):
+       conn = sqlite3.connect(self.path)
+
+       with conn:
+           cur = conn.cursor()
+
+           complete_msg = str()
+           for word in body:
+               complete_msg += word + ' '
+
+           cur.execute('INSERT INTO msg(body, sender_id, receiver_id, priv) VALUES(?, ?, ?, ?)', (complete_msg, sender, receiver, ispriv))
+           
+
+    def retrievemsg(self, receiver):
+        conn = sqlite3.connect(self.path)
+
+        with conn:
+            cur = conn.cursor()
+
+            cur.execute('SELECT sender_id,body,priv FROM msg WHERE receiver_id=?', (receiver,))
+            msgs = cur.fetchall() 
+
+            cur.execute('DELETE FROM msg WHERE receiver_id=?', (receiver,))
+
+        return msgs

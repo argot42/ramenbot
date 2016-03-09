@@ -24,7 +24,7 @@ class Bowl:
 
         # setup db table structure
         chop.setup("""CREATE TABLE IF NOT EXISTS user(nickname TEXT PRIMARY KEY NOT NULL, lastseen REAL);
-                CREATE TABLE IF NOT EXISTS msg(id_msg INTEGER PRIMARY KEY NOT NULL, body TEXT, sender_id INTEGER NOT NULL, receiver_id INTEGER NOT NULL, FOREIGN KEY(sender_id) REFERENCES user(nickname), FOREIGN KEY(receiver_id) REFERENCES user(nickname))""")
+                CREATE TABLE IF NOT EXISTS msg(id_msg INTEGER PRIMARY KEY NOT NULL, body TEXT, sender_id INTEGER NOT NULL, receiver_id INTEGER NOT NULL, priv INTEGER NOT NULL, FOREIGN KEY(sender_id) REFERENCES user(nickname))""")
 
 
     def connect(self):

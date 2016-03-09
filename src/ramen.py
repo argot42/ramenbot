@@ -51,8 +51,11 @@ class Ramen:
         # obtain command name
         print("COM->",com)
         matched = re.match(r'\.(?P<com_id>\w+)(?P<args>(?: (?:\S+))*)', com)
+
+        # if it dosn't match a command check for stored msgs
+        # yeah this is fucking messy but fuck you i'm tired
         if not matched:
-            return None
+            return Ramen.read_msgs(info, nick, receiver)
 
         # check if the msg is priv or pub
         # if priv change receiver
@@ -106,15 +109,33 @@ class Ramen:
 
 
     def tell(info, nick, receiver, args):
-        return None
+        if not args[0]:
+            return [b'PRIVMSG %b :Try .help tell.\r\n' % (str.encode(receiver, 'utf-8'))]
+        elif len(args) < 1:
+            return [b'PRIVMSG %b :The msg need a body.\r\n' % (str.encode(receiver, 'utf-8'))]
 
+        chop = Chopsticks(info['tellfile'])
+
+        try:
+            if receiver[0] != '#':
+                chop.storemsg(nick, args[0], args[1:], 1)
+
+            else:
+                chop.storemsg(nick, args[0], args[1:], 0)
+
+
+        except:
+            return [b'PRIVMSG %b :For some reason the message couldn\'t be stored, sorry :c\r\n' % (str.encode(receiver, 'utf-8'))]
+
+        else:
+            return [b'PRIVMSG %b :The msg will be delivered :)\r\n' % (str.encode(receiver, 'utf-8'))]
 
     def lastseen(info, nick, receiver, args):
         if not args[0]:
             return [b'PRIVMSG %b :Baka, this command needs a valid nick as argument.\r\n' % (str.encode(receiver, 'utf-8'))]
 
-
         chop = Chopsticks(info['tellfile'])
+
         # retrieves user lastseen timestamp from database
         # and converts it into a datetime obj
         date = datetime.datetime.fromtimestamp(chop.user_rts(args[0]))
@@ -130,3 +151,20 @@ class Ramen:
             usr_tupl += ((user, timest),)
 
         chop.userub(usr_tupl) 
+
+
+    def read_msgs(info, nick, receiver):
+        chop = Chopsticks(info['tellfile'])
+        msgs = chop.retrievemsg(nick)
+
+        pack = []
+        for msg in msgs:
+            if not msg[2]:
+                sendto = receiver
+            else: 
+                sendto = nick
+
+            pack.append(b'PRIVMSG %b :%b left this msg for %b: %b\r\n' % (str.encode(sendto, 'utf-8'), str.encode(msg[0], 'utf-8'), str.encode(nick, 'utf-8'), str.encode(msg[1], 'utf-8')))
+
+
+        return pack
