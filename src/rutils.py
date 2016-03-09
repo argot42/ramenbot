@@ -1,5 +1,7 @@
 __version__ = "0.1"
 
+symbol_map = {ord('@'): None, ord('!'): None, ord('%'): None, ord('~'): None, ord('&'): None, ord('+'): None}
+
 class fm:
     un = '\033[4m'
     b = '\033[1m'

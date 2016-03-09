@@ -1,5 +1,7 @@
-import re
-from rutils import __version__
+import re, datetime
+
+from rutils import __version__, symbol_map
+from chopsticks import Chopsticks
 
 class Ramen:
     def parse(msg_content, parser_info):
@@ -19,7 +21,9 @@ class Ramen:
         matched = re.match(r'^:(?P<sender_nick>\w+)!\S+ (?P<irc_command>\w+)(?: (?P<receiver>#\w+|\w+))* :(?P<msg_body>.+)$', msg_content)
         if matched:
             if matched.group('irc_command') == 'JOIN':
-                print('%s -> JOINED -> %s' % (matched.group('sender_nick'), matched.group('msg_body')))
+                chop = Chopsticks(parser_info['tellfile'])
+                chop.userub( ((matched.group('sender_nick'),datetime.datetime.timestamp(datetime.datetime.utcnow())),) )
+
 
             elif matched.group('irc_command') == 'PRIVMSG':
                 return Ramen.resolv_com(parser_info, matched.group('sender_nick'), matched.group('receiver'), matched.group('msg_body'))
@@ -28,7 +32,11 @@ class Ramen:
         # list of users in the channel
         matched = re.match(r'.+ = %s :%s((?: (?:(?:%%|~|&|@|\+)\w+|\w+))*)' % (parser_info['channel'], parser_info['nick']), msg_content)
         if matched:
-            Ramen.log_join(parser_info, matched.group(1)[1:].split(' ')) 
+
+            # .translate(symbol_map) removes nickname symbols
+            # .split(' ') separates users into a list
+            users = matched.group(1)[1:].translate(symbol_map).split(' ')
+            Ramen.log_join(parser_info, users) 
 
 
     def pong(pong_string):
@@ -45,6 +53,11 @@ class Ramen:
         matched = re.match(r'\.(?P<com_id>\w+)(?P<args>(?: (?:\S+))*)', com)
         if not matched:
             return None
+
+        # check if the msg is priv or pub
+        # if priv change receiver
+        if receiver[0] != '#':
+            receiver = nick
 
         comid = matched.group('com_id')
         args = matched.group('args')[1:].split(' ')
@@ -76,16 +89,16 @@ class Ramen:
                     b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (str.encode(receiver, 'utf-8'))]
 
         elif args[0] == 'help':
-            return [b'PRIVMSG %b :.help [command]: shows command sintax or, without arguments, the list of commands\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.help [command]: shows command sintax or, without arguments, the list of commands.\r\n' % (str.encode(receiver, 'utf-8'))]
 
         elif args[0] == 'lastseen':
-            return [b'PRIVMSG %b :.lastseen <user>: shows timestamp of a user\'s last connection\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.lastseen <user>: shows timestamp of a user\'s last connection.\r\n' % (str.encode(receiver, 'utf-8'))]
 
         elif args[0] == 'tell':
-            return [b'PRIVMSG %b :.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel.\r\n' % (str.encode(receiver, 'utf-8'))]
 
         elif args[0] == 'source':
-            return [b'PRIVMSG %b :.source: ramenbot is libre baby\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.source: ramenbot is libre baby.\r\n' % (str.encode(receiver, 'utf-8'))]
 
 
     def source(info, nick, receiver):
@@ -97,8 +110,23 @@ class Ramen:
 
 
     def lastseen(info, nick, receiver, args):
-        return None
+        if not args[0]:
+            return [b'PRIVMSG %b :Baka, this command needs a valid nick as argument.\r\n' % (str.encode(receiver, 'utf-8'))]
 
+
+        chop = Chopsticks(info['tellfile'])
+        # retrieves user lastseen timestamp from database
+        # and converts it into a datetime obj
+        date = datetime.datetime.fromtimestamp(chop.user_rts(args[0]))
+
+        return [b'PRIVMSG %b :%b connected for the last time %b' % (str.encode(receiver, 'utf-8'), str.encode(args[0], 'utf-8'), str.encode(date.strftime('the %Y-%m-%d at %H:%M:%S\r\n'), 'utf-8'))]
 
     def log_join(info, users):
-        print('USERS ->', info)
+        chop = Chopsticks(info['tellfile'])
+        
+        timest = datetime.datetime.timestamp(datetime.datetime.utcnow())
+        usr_tupl = tuple()
+        for user in users:
+            usr_tupl += ((user, timest),)
+
+        chop.userub(usr_tupl) 

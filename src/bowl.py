@@ -14,16 +14,17 @@ class Bowl:
         self.channel = channel
         self.tellfile = expanduser(tellfile)
 
-        # if file exist do nothing
-        if isfile(self.tellfile):
-            return
+#        # if file exist do nothing
+#        if isfile(self.tellfile):
+#            return
 
         # if not
         # creating tellfile.db
         chop = Chopsticks(self.tellfile)
 
         # setup db table structure
-        chop.setup(["CREATE TABLE user(id_user INTEGER PRIMARY KEY NOT NULL, nickname TEXT UNIQUE, lastseen INTEGER)", "CREATE TABLE msg(id_msg INTEGER PRIMARY KEY NOT NULL, body TEXT, sender_id INTEGER NOT NULL, receiver_id INTEGER NOT NULL, FOREIGN KEY(sender_id) REFERENCES user(id_user), FOREIGN KEY(receiver_id) REFERENCES user(id_user))"])
+        chop.setup("""CREATE TABLE IF NOT EXISTS user(nickname TEXT PRIMARY KEY NOT NULL, lastseen REAL);
+                CREATE TABLE IF NOT EXISTS msg(id_msg INTEGER PRIMARY KEY NOT NULL, body TEXT, sender_id INTEGER NOT NULL, receiver_id INTEGER NOT NULL, FOREIGN KEY(sender_id) REFERENCES user(nickname), FOREIGN KEY(receiver_id) REFERENCES user(nickname))""")
 
 
     def connect(self):
