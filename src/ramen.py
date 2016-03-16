@@ -77,6 +77,9 @@ class Ramen:
 
         elif comid == 'source':
             return Ramen.source(info, nick, receiver)
+
+        elif comid == 'int':
+            return Ramen.inte(receiver, args)
        
         else:
             return None
@@ -89,6 +92,7 @@ class Ramen:
                     b'PRIVMSG %b :- lastseen\r\n' % (str.encode(receiver, 'utf-8')),\
                     b'PRIVMSG %b :- tell\r\n' % (str.encode(receiver, 'utf-8')),\
                     b'PRIVMSG %b :- source\r\n' % (str.encode(receiver, 'utf-8')),\
+                    b'PRIVMSG %b :- int\r\n' % (str.encode(receiver, 'utf-8')),\
                     b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (str.encode(receiver, 'utf-8'))]
 
         elif args[0] == 'help':
@@ -102,6 +106,9 @@ class Ramen:
 
         elif args[0] == 'source':
             return [b'PRIVMSG %b :.source: ramenbot is libre baby.\r\n' % (str.encode(receiver, 'utf-8'))]
+
+        elif args[0] == 'int':
+            return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (str.encode(receiver, 'utf-8'))]
 
 
     def source(info, nick, receiver):
@@ -138,9 +145,22 @@ class Ramen:
 
         # retrieves user lastseen timestamp from database
         # and converts it into a datetime obj
-        date = datetime.datetime.fromtimestamp(chop.user_rts(args[0]))
+        timestamp = chop.user_rts(args[0])
 
-        return [b'PRIVMSG %b :%b connected for the last time %b' % (str.encode(receiver, 'utf-8'), str.encode(args[0], 'utf-8'), str.encode(date.strftime('the %Y-%m-%d at %H:%M:%S\r\n'), 'utf-8'))]
+        if not timestamp:
+            return [b'PRIVMSG %b :That person didn\'t connect while I was around\r\n' % (str.encode(receiver, 'utf-8'))]
+
+        date = datetime.datetime.fromtimestamp(timestamp)
+
+        return [b'PRIVMSG %b :%b was last seen %b utc\r\n' % (str.encode(receiver, 'utf-8'), str.encode(args[0], 'utf-8'), str.encode(date.strftime('on %Y-%m-%d at %H:%M:%S'), 'utf-8'))]
+
+
+    def inte(receiver, args):
+        if not args[0]:
+            return [b'PRIVMSG %b :Needs argument to intensify\r\n' % (str.encode(receiver, 'utf-8'))]
+
+        return [b'PRIVMSG %b :[%b INTENSIFIES]\r\n' % (str.encode(receiver, 'utf-8'), str.encode(' '.join(args).upper(), 'utf-8'))]
+
 
     def log_join(info, users):
         chop = Chopsticks(info['tellfile'])

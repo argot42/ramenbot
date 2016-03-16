@@ -1,4 +1,4 @@
-__version__ = "0.1"
+__version__ = "1.0"
 
 symbol_map = {ord('@'): None, ord('!'): None, ord('%'): None, ord('~'): None, ord('&'): None, ord('+'): None}
 
