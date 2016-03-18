@@ -64,4 +64,6 @@ def complete_missing(configuration_list):
             configuration_list['channel'][1] = True
 
 
+    # Configuration not mandatory
     configuration_list['tellfile'][1] = True
+    configuration_list['ssl'][1] = True

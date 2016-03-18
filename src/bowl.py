@@ -1,4 +1,4 @@
-import sys, socket
+import sys, socket, ssl
 from os.path import expanduser, isfile
 
 from ramen import Ramen
@@ -6,19 +6,15 @@ from chopsticks import Chopsticks
 from sqlite3 import OperationalError
 
 class Bowl:
-    def __init__(self, host, port, nick, realname, channel, tellfile):
+    def __init__(self, host='', port=0, nick='', realname='', channel='', tellfile='', ssl=False):
         self.host = host
         self.port = port
         self.nick = nick
         self.realname = realname
         self.channel = channel
         self.tellfile = expanduser(tellfile)
+        self.ssl = ssl
 
-#        # if file exist do nothing
-#        if isfile(self.tellfile):
-#            return
-
-        # if not
         # creating tellfile.db
         chop = Chopsticks(self.tellfile)
 
@@ -31,6 +27,9 @@ class Bowl:
         # connect to server
         ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ircsock.connect((self.host, self.port))
+
+        if self.ssl:
+            ircsock = ssl.wrap_socket(ircsock)
 
         # send nick and user info 
         ircsock.send(b'NICK %b\r\n' % self.nick)

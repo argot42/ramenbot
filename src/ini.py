@@ -6,7 +6,7 @@ from bowl import Bowl
 from rutils import usage, check, complete_missing, __version__
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hvf:H:p:n:r:c:t:", ["help", "version", "config=", "host=", "port=", "nick=", "realname=", "channel=", "tellfile="])
+    opts, args = getopt.getopt(sys.argv[1:], "hvsf:H:p:n:r:c:t:", ["help", "version", "ssl", "config=", "host=", "port=", "nick=", "realname=", "channel=", "tellfile="])
 
 except getopt.GetoptError as err:
     usage()
@@ -22,6 +22,7 @@ bot_configuration = \
         'nick': [b'', False],
         'realname': [b'', False],
         'channel': [b'', False],
+        'ssl': [False, False],
         'tellfile': ['~/.ramenbot/tellfile.db', False]
     }
 
@@ -36,6 +37,10 @@ for option, argument in opts:
     
     elif option in ("-f", "--config"):
         config_file_path = argument
+
+    elif option in ("-s", "--ssl"):
+        bot_configuration['ssl'][0] = True
+        bot_configuration['ssl'][1] = True
 
     elif option in ("-H", "--host"):
         if check(bot_configuration["host"], "host"):
@@ -109,13 +114,19 @@ else:
                 bot_configuration["tellfile"][0] = parts[1] + '/tellfile.db'
                 bot_configuration["tellfile"][1] = True
 
+        elif parts[0] == 'ssl':
+            if not bot_configuration['ssl'][1]:
+                bot_configuration['ssl'][0] = parts[1] == 'True'
+                bot_configuration['ssl'][1] = True
+
 
 # Complete mandatory config info
 complete_missing(bot_configuration)
 print(bot_configuration)
 
-bowl = Bowl(bot_configuration["host"][0], bot_configuration["port"][0], bot_configuration["nick"][0],\
-        bot_configuration["realname"][0], bot_configuration["channel"][0], bot_configuration["tellfile"][0])
+bowl = Bowl(host=bot_configuration["host"][0], port=bot_configuration["port"][0], nick=bot_configuration["nick"][0],\
+        realname=bot_configuration["realname"][0], channel=bot_configuration["channel"][0], tellfile=bot_configuration["tellfile"][0],\
+        ssl=bot_configuration['ssl'][0])
 
 try:
     bowl.connect()

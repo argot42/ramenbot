@@ -1,4 +1,4 @@
-import re, datetime
+import re, datetime, urllib.request, json
 
 from rutils import __version__, symbol_map
 from chopsticks import Chopsticks
@@ -40,11 +40,11 @@ class Ramen:
 
 
     def pong(pong_string):
-        return [b'PONG %b\r\n' % (str.encode(pong_string, 'utf-8'))]
+        return [b'PONG %b\r\n' % (pong_string.encode('utf-8'))]
 
 
     def join(channel):
-        return [b'JOIN %b\r\n' % (str.encode(channel, 'utf-8'))]
+        return [b'JOIN %b\r\n' % (channel.encode('utf-8'))]
 
 
     def resolv_com(info, nick, receiver, com):
@@ -81,45 +81,49 @@ class Ramen:
         elif comid == 'int':
             return Ramen.inte(receiver, args)
        
+        elif comid == 'w':
+            return Ramen.weather(receiver, args)
+
         else:
             return None
 
 
     def help(info, nick, receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :List of Commands:\r\n' % (str.encode(receiver, 'utf-8')),\
-                    b'PRIVMSG %b :- help\r\n' % (str.encode(receiver, 'utf-8')),\
-                    b'PRIVMSG %b :- lastseen\r\n' % (str.encode(receiver, 'utf-8')),\
-                    b'PRIVMSG %b :- tell\r\n' % (str.encode(receiver, 'utf-8')),\
-                    b'PRIVMSG %b :- source\r\n' % (str.encode(receiver, 'utf-8')),\
-                    b'PRIVMSG %b :- int\r\n' % (str.encode(receiver, 'utf-8')),\
-                    b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :List of Commands:\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- help\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- lastseen\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- tell\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- source\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- int\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- w\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'help':
-            return [b'PRIVMSG %b :.help [command]: shows command sintax or, without arguments, the list of commands.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.help [command]: shows command sintax or, without arguments, the list of commands.\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'lastseen':
-            return [b'PRIVMSG %b :.lastseen <user>: shows timestamp of a user\'s last connection.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.lastseen <user>: shows timestamp of a user\'s last connection.\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'tell':
-            return [b'PRIVMSG %b :.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel.\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'source':
-            return [b'PRIVMSG %b :.source: ramenbot is libre baby.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.source: ramenbot is libre baby.\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'int':
-            return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (receiver.encode('utf-8'))]
 
 
     def source(info, nick, receiver):
-        return [b'PRIVMSG %b :ramenbot v%b [https://github.com/argot42/ramenbot.git]\r\n' % (str.encode(receiver, 'utf-8'), str.encode(__version__, 'utf-8'))]
+        return [b'PRIVMSG %b :ramenbot v%b [https://github.com/argot42/ramenbot.git]\r\n' % (receiver.encode('utf-8'), __version__.encode('utf-8'))]
 
 
     def tell(info, nick, receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :Try .help tell.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :Try .help tell.\r\n' % (receiver.encode('utf-8'))]
         elif len(args) < 1:
-            return [b'PRIVMSG %b :The msg need a body.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :The msg need a body.\r\n' % (receiver.encode('utf-8'))]
 
         chop = Chopsticks(info['tellfile'])
 
@@ -132,14 +136,14 @@ class Ramen:
 
 
         except:
-            return [b'PRIVMSG %b :For some reason the message couldn\'t be stored, sorry :c\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :For some reason the message couldn\'t be stored, sorry :c\r\n' % (receiver.encode('utf-8'))]
 
         else:
-            return [b'PRIVMSG %b :The msg will be delivered :)\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :The msg will be delivered :)\r\n' % (receiver.encode('utf-8'))]
 
     def lastseen(info, nick, receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :Baka, this command needs a valid nick as argument.\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :Baka, this command needs a valid nick as argument.\r\n' % (receiver.encode('utf-8'))]
 
         chop = Chopsticks(info['tellfile'])
 
@@ -148,18 +152,18 @@ class Ramen:
         timestamp = chop.user_rts(args[0])
 
         if not timestamp:
-            return [b'PRIVMSG %b :That person didn\'t connect while I was around\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :That person didn\'t connect while I was around\r\n' % (receiver.encode('utf-8'))]
 
         date = datetime.datetime.fromtimestamp(timestamp)
 
-        return [b'PRIVMSG %b :%b was last seen %b utc\r\n' % (str.encode(receiver, 'utf-8'), str.encode(args[0], 'utf-8'), str.encode(date.strftime('on %Y-%m-%d at %H:%M:%S'), 'utf-8'))]
+        return [b'PRIVMSG %b :%b was last seen %b utc\r\n' % (receiver.encode('utf-8'), args[0].encode('utf-8'), date.strftime('on %Y-%m-%d at %H:%M:%S').encode('utf-8'))]
 
 
     def inte(receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :Needs argument to intensify\r\n' % (str.encode(receiver, 'utf-8'))]
+            return [b'PRIVMSG %b :Needs argument to intensify\r\n' % (receiver.encode('utf-8'))]
 
-        return [b'PRIVMSG %b :[%b INTENSIFIES]\r\n' % (str.encode(receiver, 'utf-8'), str.encode(' '.join(args).upper(), 'utf-8'))]
+        return [b'PRIVMSG %b :[%b INTENSIFIES]\r\n' % (receiver.encode('utf-8'), ' '.join(args).upper().encode('utf-8'))]
 
 
     def log_join(info, users):
@@ -184,7 +188,69 @@ class Ramen:
             else: 
                 sendto = nick
 
-            pack.append(b'PRIVMSG %b :%b left this msg for %b: %b\r\n' % (str.encode(sendto, 'utf-8'), str.encode(msg[0], 'utf-8'), str.encode(nick, 'utf-8'), str.encode(msg[1], 'utf-8')))
+            pack.append(b'PRIVMSG %b :%b left this msg for %b: %b\r\n' % (sendto.encode('utf-8'), msg[0].encode('utf-8'), nick.encode('utf-8'), msg[1].encode('utf-8')))
 
 
         return pack
+
+
+    def weather(receiver, args):
+        try:
+            url = Ramen.parse_weather(args)
+        except RuntimeError as err:
+            return [b'PRIVMSG %b :%b\r\n' % (receiver.encode('utf-8'), err.args[1].encode('utf-8'))]
+            
+        response = urllib.request.urlopen(url)
+        print(response)
+        res_obj = json.loads(response.read().decode('utf-8'))
+
+        # place info
+        place = res_obj['query']['results']['channel']['location']
+        # todays weather
+        wea = res_obj['query']['results']['channel']['item']['forecast'][0]
+
+        return [b'PRIVMSG %b :Current conditions in %b, %b, %b - %b High: %b Low: %b\r\n'\
+                % (receiver.encode('utf-8'),\
+                    place['city'].encode('utf-8'), place['region'].encode('utf-8'), place['country'].encode('utf-8'),\
+                    wea['text'].encode('utf-8'), wea['high'].encode('utf-8'), wea['low'].encode('utf-8'))] 
+
+
+    def parse_weather(args):
+        if not args[0]:
+            raise RuntimeError('no_arguments', 'You must provide arguments for this command')
+
+        # [[city], [region], [country]*, [unit]*]
+        # * = not mandatory
+        info = [[], [], [], 'c'] 
+        count = 0
+
+        for value in args:
+            if value[0] == ':':
+                if value == ':c' or ':f':
+                    info[-1] = value[1] 
+                continue
+
+            info[count].append(value)
+
+            if value[-1] == ',':
+                count+=1
+
+        if not info[0] or not info[1]:
+            raise RuntimeError('city_region', 'You must provide at least a city and a region/country')
+
+        map_table = {ord(','):'', ord(' '):'%20'}
+
+        city = ' '.join(info[0]).translate(map_table)
+        region = '%2C%20' + ' '.join(info[1]).translate(map_table)
+
+        if not info[2]:
+            country = ''
+        else:
+            country = '%2C%20' + ' '.join(info[2]).translate(map_table)
+
+        unit = info[3]
+
+        base_url = 'https://query.yahooapis.com/v1/public/'
+        query_url = 'yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22{city}{region}{country}%22)%20and%20u%3D%22{unit}%22&format=json'.format(city=city, region=region, country=country, unit=unit)
+
+        return base_url + query_url
