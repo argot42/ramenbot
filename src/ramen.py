@@ -75,7 +75,7 @@ class Ramen:
         elif comid == 'lastseen':
             return Ramen.lastseen(info, nick, receiver, args)
 
-        elif comid == 'source':
+        elif comid == 'src':
             return Ramen.source(info, nick, receiver)
 
         elif comid == 'int':
@@ -83,6 +83,9 @@ class Ramen:
        
         elif comid == 'w':
             return Ramen.weather(receiver, args)
+
+        elif comid == 'wiki':
+            return Ramen.wiki(receiver, args)
 
         else:
             return None
@@ -94,9 +97,10 @@ class Ramen:
                     b'PRIVMSG %b :- help\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- lastseen\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- tell\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- source\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- src\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- int\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- w\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- wiki\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'help':
@@ -108,11 +112,17 @@ class Ramen:
         elif args[0] == 'tell':
             return [b'PRIVMSG %b :.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel.\r\n' % (receiver.encode('utf-8'))]
 
-        elif args[0] == 'source':
-            return [b'PRIVMSG %b :.source: ramenbot is libre baby.\r\n' % (receiver.encode('utf-8'))]
+        elif args[0] == 'src':
+            return [b'PRIVMSG %b :.src: ramenbot is libre baby.\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'int':
             return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (receiver.encode('utf-8'))]
+
+        elif args[0] == 'w':
+            return [b'PRIVMSG %b :.w <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region\r\n' % (receiver.encode('utf-8'))]
+
+        elif args[0] == 'wiki':
+            return [b'PRIVMSG %b :.wiki <something>: Looks something up in wikipedia\r\n' % (receiver.encode('utf-8'))]
 
 
     def source(info, nick, receiver):
@@ -200,9 +210,8 @@ class Ramen:
         except RuntimeError as err:
             return [b'PRIVMSG %b :%b\r\n' % (receiver.encode('utf-8'), err.args[1].encode('utf-8'))]
             
-        response = urllib.request.urlopen(url)
-        print(response)
-        res_obj = json.loads(response.read().decode('utf-8'))
+        with urllib.request.urlopen(url) as response:
+            res_obj = json.loads(response.read().decode('utf-8'))
 
         # place info
         place = res_obj['query']['results']['channel']['location']
@@ -236,7 +245,7 @@ class Ramen:
                 count+=1
 
         if not info[0] or not info[1]:
-            raise RuntimeError('city_region', 'You must provide at least a city and a region/country')
+            raise RuntimeError('city_region', 'You must provide at least a city and a region or country')
 
         map_table = {ord(','):'', ord(' '):'%20'}
 
@@ -254,3 +263,25 @@ class Ramen:
         query_url = 'yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22{city}{region}{country}%22)%20and%20u%3D%22{unit}%22&format=json'.format(city=city, region=region, country=country, unit=unit)
 
         return base_url + query_url
+
+
+    def wiki(receiver, args):
+        if not args[0]:
+            return [b'PRIVMSG %b :This commands needs at least one argument\r\n' % (receiver.encode('utf-8'))]
+
+        # set up search
+        search = '+'.join(args)
+        url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info&titles={title}&inprop=url'.format(title=search)
+        user_agent = 'mozilla/5.0 (x11; linux x86_64; rv:38.9)'
+        headers = {'user-agent':user_agent}
+
+        req = urllib.request.Request(url, None, headers)
+        with urllib.request.urlopen(req) as response:
+            obj_res = json.loads(response.read().decode('utf-8'))
+
+        item = obj_res['query']['pages'].popitem()
+        if item[0] == '-1':
+            return [b'PRIVMSG %b :No article found\r\n' % (receiver.encode('utf-8'))]
+
+        else:
+            return [b'PRIVMSG %b :%b\r\n' % (receiver.encode('utf-8'), item[1]['canonicalurl'].encode('utf-8'))]
