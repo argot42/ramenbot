@@ -298,10 +298,9 @@ class Ramen:
         header_content = [msg_type]
         if send_to: header_content.append(send_to)
 
-        if msg_type == 'JOIN':
+        if msg_type in ['JOIN', 'NICK']:
             msg_body = ''
         else:
             msg_body = ' :' + body.format(*fparts)
 
-        print(('{0}{1}\r\n'.format(' '.join(header_content), msg_body)).encode('utf-8'))
         return ('{0}{1}\r\n'.format(' '.join(header_content), msg_body)).encode('utf-8')

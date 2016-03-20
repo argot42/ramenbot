@@ -1,5 +1,5 @@
 import sys, socket, ssl
-from os.path import expanduser, isfile
+from os.path import expanduser
 
 from ramen import Ramen
 from chopsticks import Chopsticks
@@ -32,8 +32,8 @@ class Bowl:
             ircsock = ssl.wrap_socket(ircsock)
 
         # send nick and user info 
-        ircsock.send(b'NICK %b\r\n' % self.nick)
-        ircsock.send(b'USER %b %b %b :%b\r\n' % (self.nick, self.nick, self.nick, self.realname))
+        ircsock.send(Ramen.buil_msg(msg_type='NICK', send_to=self.nick))
+        ircsock.send(Ramen.buil_msg(msg_type='USER', send_to=' '.join(self.nick, self.nick, self.nick), body=self.realname))
 
         parser_info = {"nick": (self.nick.decode('utf-8')),\
                         "channel": (self.channel.decode('utf-8')),\
