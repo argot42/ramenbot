@@ -8,7 +8,7 @@ class Ramen:
         print(msg_content)
 
         # bot pings server
-        matched = re.match(r'PING (?P<ping_id>:\w+)', msg_content)
+        matched = re.match(r'PING :(?P<ping_id>\w+)', msg_content)
         if matched:
             return Ramen.pong(matched.group('ping_id'))
 
@@ -40,11 +40,11 @@ class Ramen:
 
 
     def pong(pong_string):
-        return [b'PONG %b\r\n' % (pong_string.encode('utf-8'))]
+        return [Ramen.build_msg(body=pong_string, msg_type='PONG')]
 
 
     def join(channel):
-        return [b'JOIN %b\r\n' % (channel.encode('utf-8'))]
+        return [Ramen.build_msg(msg_type='JOIN', send_to=channel)]
 
 
     def resolv_com(info, nick, receiver, com):
@@ -93,47 +93,49 @@ class Ramen:
 
     def help(info, nick, receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :List of Commands:\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- help\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- lastseen\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- tell\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- src\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- int\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- weather\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- wiki\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (receiver.encode('utf-8'))]
+           return [Ramen.build_msg(send_to=receiver, body='List of Commands:'),\
+                   Ramen.build_msg(send_to=receiver, body='- help'),\
+                   Ramen.build_msg(send_to=receiver, body='- lastseen'),\
+                   Ramen.build_msg(send_to=receiver, body='- tell'),\
+                   Ramen.build_msg(send_to=receiver, body='- src'),\
+                   Ramen.build_msg(send_to=receiver, body='- int'),\
+                   Ramen.build_msg(send_to=receiver, body='- weather'),\
+                   Ramen.build_msg(send_to=receiver, body='- wiki'),\
+                   Ramen.build_msg(send_to=receiver, body='Try .help <command_name> to check command\'s syntax')]
+                   
 
         elif args[0] == 'help':
-            return [b'PRIVMSG %b :.help [command]: shows command sintax or, without arguments, the list of commands.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.help [command]: shows command sintax or, without arguments, the list of commands')]
 
         elif args[0] == 'lastseen':
-            return [b'PRIVMSG %b :.lastseen <user>: shows timestamp of a user\'s last connection.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.lastseen <user>: shows timestamp of a user\'s last connection')]
+
 
         elif args[0] == 'tell':
-            return [b'PRIVMSG %b :.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel')]
 
         elif args[0] == 'src':
-            return [b'PRIVMSG %b :.src: ramenbot is libre baby.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.src: ramenbot is libre baby')]
 
         elif args[0] == 'int':
-            return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.int <somthing>: Intesifies something')]
 
         elif args[0] == 'weather':
-            return [b'PRIVMSG %b :.weather <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.weather <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region')]
 
         elif args[0] == 'wiki':
-            return [b'PRIVMSG %b :.wiki <something>: Looks something up in wikipedia\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='.wiki <something>: Looks something up in wikipedia')]
 
 
     def source(info, nick, receiver):
-        return [b'PRIVMSG %b :ramenbot v%b [https://github.com/argot42/ramenbot.git]\r\n' % (receiver.encode('utf-8'), __version__.encode('utf-8'))]
+        return [Ramen.build_msg(send_to=receiver, body='ramenbot v{0} [https://github.com/argot42/ramenbot.git]', fparts=(__version__,))]
 
 
     def tell(info, nick, receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :Try .help tell.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='Try .help tell')]
         elif len(args) < 1:
-            return [b'PRIVMSG %b :The msg need a body.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='The msg need a body')]
 
         chop = Chopsticks(info['tellfile'])
 
@@ -146,14 +148,14 @@ class Ramen:
 
 
         except:
-            return [b'PRIVMSG %b :For some reason the message couldn\'t be stored, sorry :c\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='For some reason the message couldn\'t be stored, sorry :c')]
 
         else:
-            return [b'PRIVMSG %b :The msg will be delivered :3\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='The msg will be delivered :3')]
 
     def lastseen(info, nick, receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :Baka, this command needs a valid nick as argument.\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='Baka, this command needs a valid nick as argument')]
 
         chop = Chopsticks(info['tellfile'])
 
@@ -162,18 +164,18 @@ class Ramen:
         timestamp = chop.user_rts(args[0])
 
         if not timestamp:
-            return [b'PRIVMSG %b :That person didn\'t connect while I was around\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='That person didn\'t connect while I was around')]
 
         date = datetime.datetime.fromtimestamp(timestamp)
 
-        return [b'PRIVMSG %b :%b was last seen %b utc\r\n' % (receiver.encode('utf-8'), args[0].encode('utf-8'), date.strftime('on %Y-%m-%d at %H:%M:%S').encode('utf-8'))]
+        return [Ramen.build_msg(send_to=receiver, body='{0} was last seen {1} utc', fparts=(args[0], date.strftime('on %Y-%m-%d at %H:%M:%S')))]
 
 
     def inte(receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :Needs argument to intensify\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to='receiver', body='Needs argument to intensify')]
 
-        return [b'PRIVMSG %b :[%b INTENSIFIES]\r\n' % (receiver.encode('utf-8'), ' '.join(args).upper().encode('utf-8'))]
+        return [Ramen.build_msg(send_to=receiver, body='[{0} INTENSIFIES]', fparts=(' '.join(args).upper()))]
 
 
     def log_join(info, users):
@@ -198,7 +200,7 @@ class Ramen:
             else: 
                 sendto = nick
 
-            pack.append(b'PRIVMSG %b :%b left this msg for %b: %b\r\n' % (sendto.encode('utf-8'), msg[0].encode('utf-8'), nick.encode('utf-8'), msg[1].encode('utf-8')))
+            pack.append(Ramen.build_msg(send_to=sendto, body='{0} left this msg for {1}: {2}', fparts=(msg[0], nick, msg[1])))
 
 
         return pack
@@ -208,7 +210,7 @@ class Ramen:
         try:
             url = Ramen.parse_weather(args)
         except RuntimeError as err:
-            return [b'PRIVMSG %b :%b\r\n' % (receiver.encode('utf-8'), err.args[1].encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='{0}', fparts=(err.args[1]))]
             
         with urllib.request.urlopen(url) as response:
             res_obj = json.loads(response.read().decode('utf-8'))
@@ -217,17 +219,16 @@ class Ramen:
         # check if the query was succesful
         chan = res_obj['query']['results']['channel']
         if not 'location' in chan:
-            return [b'PRIVMSG %b :Yahoo Weather Error :\'(\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='It\'s Yahoo Weather\'s fault >:(')]
 
         place = chan['location']
         
         # todays weather
         wea = chan['item']['forecast'][0]
 
-        return [b'PRIVMSG %b :Current conditions in %b, %b, %b - %b High: %b Low: %b\r\n'\
-                % (receiver.encode('utf-8'),\
-                    place['city'].encode('utf-8'), place['region'].encode('utf-8'), place['country'].encode('utf-8'),\
-                    wea['text'].encode('utf-8'), wea['high'].encode('utf-8'), wea['low'].encode('utf-8'))] 
+        return [Ramen.build_msg(send_to=receiver, body='Current conditions in {0}, {1}, {2} - {3} High: {4} Low: {5}',fparts=(\
+                place['city'], place['region'], place['country'],\
+                wea['text'], wea['high'], wea['low']))]
 
 
     def parse_weather(args):
@@ -273,7 +274,7 @@ class Ramen:
 
     def wiki(receiver, args):
         if not args[0]:
-            return [b'PRIVMSG %b :This commands needs at least one argument\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='This commands needs at least one argument')]
 
         # set up search
         search = '+'.join(args)
@@ -287,7 +288,20 @@ class Ramen:
 
         item = obj_res['query']['pages'].popitem()
         if item[0] == '-1':
-            return [b'PRIVMSG %b :No article found\r\n' % (receiver.encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='No article found')]
 
         else:
-            return [b'PRIVMSG %b :%b\r\n' % (receiver.encode('utf-8'), item[1]['canonicalurl'].encode('utf-8'))]
+            return [Ramen.build_msg(send_to=receiver, body='{0}', fparts=(item[1]['canonicalurl']))]
+
+
+    def build_msg(send_to='', body='', msg_type='PRIVMSG', fparts=()):
+        header_content = [msg_type]
+        if send_to: header_content.append(send_to)
+
+        if msg_type == 'JOIN':
+            msg_body = ''
+        else:
+            msg_body = ' :' + body.format(*fparts)
+
+        print(('{0}{1}\r\n'.format(' '.join(header_content), msg_body)).encode('utf-8'))
+        return ('{0}{1}\r\n'.format(' '.join(header_content), msg_body)).encode('utf-8')
