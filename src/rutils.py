@@ -20,7 +20,8 @@ def usage():
     print("%s -n nickname, --nick=nickname%s\t\tramenbot nickname" % (fm.b, fm.end))
     print("%s -r realname, --realname=realname%s\tramenbot realname (default nickname)" % (fm.b, fm.end))
     print("%s -c channel, --channel=channel%s\t\tChannel ramenbot will join" % (fm.b, fm.end))
-    print("%s -t path, --tellfile=path%s\t\tJson file from where .tell command will pull and write\n\t\t\t\t\tthe user msgs" % (fm.b, fm.end))
+    print("%s -s, --ssl%s\t\t\t\tramenbot will use a secure connection" % (fm.b, fm.end))
+    print("%s -t path, --tellfile=path%s\t\tSQLite db from where .tell command will pull and write\n\t\t\t\t\tthe user msgs" % (fm.b, fm.end))
 
 
 def check(data, indentifier):

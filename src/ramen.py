@@ -18,7 +18,7 @@ class Ramen:
             return Ramen.join(parser_info['channel'])
 
         # bot reads msgs
-        matched = re.match(r'^:(?P<sender_nick>\w+)!\S+ (?P<irc_command>\w+)(?: (?P<receiver>#\w+|\w+))* :(?P<msg_body>.+)$', msg_content)
+        matched = re.match(r'^:(?P<sender_nick>[\w, -]+)!\S+ (?P<irc_command>\w+)(?: (?P<receiver>[#\w, -]+|[\w, -]+))* :(?P<msg_body>.+)$', msg_content)
         if matched:
             if matched.group('irc_command') == 'JOIN':
                 chop = Chopsticks(parser_info['tellfile'])
@@ -30,7 +30,7 @@ class Ramen:
 
 
         # list of users in the channel
-        matched = re.match(r'.+ = %s :%s((?: (?:(?:%%|~|&|@|\+)\w+|\w+))*)' % (parser_info['channel'], parser_info['nick']), msg_content)
+        matched = re.match(r'.+ = %s :%s((?: (?:[(?:%%|~|&|@|\+)\w, -]+|[\w, -]+))*)' % (parser_info['channel'], parser_info['nick']), msg_content)
         if matched:
 
             # .translate(symbol_map) removes nickname symbols
@@ -118,7 +118,7 @@ class Ramen:
         elif args[0] == 'int':
             return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (receiver.encode('utf-8'))]
 
-        elif args[0] == 'w':
+        elif args[0] == 'weather':
             return [b'PRIVMSG %b :.weather <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'wiki':
@@ -213,10 +213,16 @@ class Ramen:
         with urllib.request.urlopen(url) as response:
             res_obj = json.loads(response.read().decode('utf-8'))
 
-        # place info
-        place = res_obj['query']['results']['channel']['location']
+
+        # check if the query was succesful
+        chan = res_obj['query']['results']['channel']
+        if not 'location' in chan:
+            return [b'PRIVMSG %b :Yahoo Weather Error :\'(\r\n' % (receiver.encode('utf-8'))]
+
+        place = chan['location']
+        
         # todays weather
-        wea = res_obj['query']['results']['channel']['item']['forecast'][0]
+        wea = chan['item']['forecast'][0]
 
         return [b'PRIVMSG %b :Current conditions in %b, %b, %b - %b High: %b Low: %b\r\n'\
                 % (receiver.encode('utf-8'),\
