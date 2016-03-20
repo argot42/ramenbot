@@ -4,4 +4,4 @@ if [ ! -d $HOME/.ramenbot ]; then
     mkdir $HOME/.ramenbot
 fi
 
-python ini.py $@
+python3 ini.py $@

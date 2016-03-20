@@ -81,7 +81,7 @@ class Ramen:
         elif comid == 'int':
             return Ramen.inte(receiver, args)
        
-        elif comid == 'w':
+        elif comid == 'weather':
             return Ramen.weather(receiver, args)
 
         elif comid == 'wiki':
@@ -99,7 +99,7 @@ class Ramen:
                     b'PRIVMSG %b :- tell\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- src\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- int\r\n' % (receiver.encode('utf-8')),\
-                    b'PRIVMSG %b :- w\r\n' % (receiver.encode('utf-8')),\
+                    b'PRIVMSG %b :- weather\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :- wiki\r\n' % (receiver.encode('utf-8')),\
                     b'PRIVMSG %b :Try .help <command_name> to check command\'s syntax\r\n' % (receiver.encode('utf-8'))]
 
@@ -119,7 +119,7 @@ class Ramen:
             return [b'PRIVMSG %b :.int <somthing>: Intesifies something.\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'w':
-            return [b'PRIVMSG %b :.w <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region\r\n' % (receiver.encode('utf-8'))]
+            return [b'PRIVMSG %b :.weather <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region\r\n' % (receiver.encode('utf-8'))]
 
         elif args[0] == 'wiki':
             return [b'PRIVMSG %b :.wiki <something>: Looks something up in wikipedia\r\n' % (receiver.encode('utf-8'))]
@@ -149,7 +149,7 @@ class Ramen:
             return [b'PRIVMSG %b :For some reason the message couldn\'t be stored, sorry :c\r\n' % (receiver.encode('utf-8'))]
 
         else:
-            return [b'PRIVMSG %b :The msg will be delivered :)\r\n' % (receiver.encode('utf-8'))]
+            return [b'PRIVMSG %b :The msg will be delivered :3\r\n' % (receiver.encode('utf-8'))]
 
     def lastseen(info, nick, receiver, args):
         if not args[0]:
