@@ -210,7 +210,7 @@ class Ramen:
         try:
             url = Ramen.parse_weather(args)
         except RuntimeError as err:
-            return [Ramen.build_msg(send_to=receiver, body='{0}', fparts=(err.args[1]))]
+            return [Ramen.build_msg(send_to=receiver, body='{0}', fparts=(err.args[1],))]
             
         with urllib.request.urlopen(url) as response:
             res_obj = json.loads(response.read().decode('utf-8'))
@@ -226,7 +226,7 @@ class Ramen:
         # todays weather
         wea = chan['item']['forecast'][0]
 
-        return [Ramen.build_msg(send_to=receiver, body='Current conditions in {0}, {1}, {2} - {3} High: {4} Low: {5}',fparts=(\
+        return [Ramen.build_msg(send_to=receiver, body='Current conditions in {0}, {1}, {2} - [{3}] High: {4} Low: {5}',fparts=(\
                 place['city'], place['region'], place['country'],\
                 wea['text'], wea['high'], wea['low']))]
 

@@ -19,9 +19,9 @@ config_file_path = '~/.ramenbot/ramenrc'
 bot_configuration = \
     {'host': [str(), False],
         'port': [int(), False],
-        'nick': [b'', False],
-        'realname': [b'', False],
-        'channel': [b'', False],
+        'nick': [str(), False],
+        'realname': [str(), False],
+        'channel': [str(), False],
         'ssl': [False, False],
         'tellfile': ['~/.ramenbot/tellfile.db', False]
     }
@@ -54,17 +54,17 @@ for option, argument in opts:
 
     elif option in ("-n", "--nick"):
         if check(bot_configuration["nick"], "nick"):
-            bot_configuration["nick"][0] = str.encode(argument, 'utf-8')
+            bot_configuration["nick"][0] = argument
             bot_configuration["nick"][1] = True
 
     elif option in ("-r", "--realname"):
         if check(bot_configuration["realname"], "realname"):
-            bot_configuration["realname"][0] = str.encode(argument, 'utf-8')
+            bot_configuration["realname"][0] = argument
             bot_configuration["realname"][1] = True
 
     elif option in ("-c", "--channel"):
         if check(bot_configuration["channel"], "channel"):
-            bot_configuration["channel"][0] = str.encode(argument, 'utf-8')
+            bot_configuration["channel"][0] = argument
             bot_configuration["channel"][1] = True
 
     elif option in ("-t", "--tellfile"):
@@ -86,12 +86,12 @@ else:
         
         if parts[0] == 'nick':
             if not bot_configuration["nick"][1] and check(parts[1], "nick"): 
-                bot_configuration["nick"][0] = str.encode(parts[1], 'utf-8')
+                bot_configuration["nick"][0] = parts[1]
                 bot_configuration["nick"][1] = True
 
         elif parts[0] == 'realname':
             if not bot_configuration["realname"][1] and check(parts[1], "realname"): 
-                bot_configuration["realname"][0] = str.encode(parts[1], 'utf-8')
+                bot_configuration["realname"][0] = parts[1]
                 bot_configuration["realname"][1] = True
 
         elif parts[0] == 'host':
@@ -106,7 +106,7 @@ else:
 
         elif parts[0] == 'channel':
             if not bot_configuration["channel"][1] and check(parts[1], "channel"): 
-                bot_configuration["channel"][0] = str.encode(parts[1], 'utf-8')
+                bot_configuration["channel"][0] = parts[1]
                 bot_configuration["channel"][1] = True
 
         elif parts[0] == 'tellfile':
@@ -128,8 +128,4 @@ bowl = Bowl(host=bot_configuration["host"][0], port=bot_configuration["port"][0]
         realname=bot_configuration["realname"][0], channel=bot_configuration["channel"][0], tellfile=bot_configuration["tellfile"][0],\
         ssl=bot_configuration['ssl'][0])
 
-try:
-    bowl.connect()
-
-except:
-    raise
+bowl.connect()

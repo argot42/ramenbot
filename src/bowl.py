@@ -32,11 +32,11 @@ class Bowl:
             ircsock = ssl.wrap_socket(ircsock)
 
         # send nick and user info 
-        ircsock.send(Ramen.buil_msg(msg_type='NICK', send_to=self.nick))
-        ircsock.send(Ramen.buil_msg(msg_type='USER', send_to=' '.join(self.nick, self.nick, self.nick), body=self.realname))
+        ircsock.send(Ramen.build_msg(msg_type='NICK', send_to=self.nick))
+        ircsock.send(Ramen.build_msg(msg_type='USER', send_to=' '.join([self.nick, self.nick, self.nick]), body=self.realname))
 
-        parser_info = {"nick": (self.nick.decode('utf-8')),\
-                        "channel": (self.channel.decode('utf-8')),\
+        parser_info = {"nick": self.nick,\
+                        "channel": self.channel,\
                         "tellfile": self.tellfile\
                         }
 
