@@ -1,3 +1,5 @@
+import re, os
+
 __version__ = "1.0"
 
 symbol_map = {ord('@'): None, ord('!'): None, ord('%'): None, ord('~'): None, ord('&'): None, ord('+'): None}
@@ -24,8 +26,64 @@ def usage():
     print("%s -t path, --tellfile=path%s\t\tSQLite db from where .tell command will pull and write\n\t\t\t\t\tthe user msgs" % (fm.b, fm.end))
 
 
+def check_host(data):
+    if type(data) != str:
+        return False
+
+    matched = re.match(r'^(?:[\w,-]+\.)+\w+$', data)
+    if matched:
+        return True
+    else:
+        return False
+
+
+def check_nick(data):
+    if type(data) != str:
+        return False
+
+    matched = re.match(r'^[\w,-]+$', data)
+    if matched:
+        return True
+    else:
+        return False
+
+
+def check_port(data):
+    try:
+        int(data)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def check_path(data):
+    return os.path.exists(data)   
+
+
+def check_chan(data):
+    if type(data) != str:
+        return False
+
+    matched = re.match(r'^#[\w,-]+$', data)
+    if matched:
+        return True
+    else:
+        return False
+
+
 def check(data, indentifier):
-    return True
+    if indentifier == 'host':
+        return check_host(data)
+    elif indentifier == 'port':
+        return check_port(data)
+    elif indentifier in ['nick', 'realname']:
+        return check_nick(data)
+    elif indentifier == 'channel':
+        return check_chan(data)
+    elif indentifier == 'tellfile':
+        return check_path(data)
+
 
 def complete_missing(configuration_list):
     while not configuration_list['host'][1]:
@@ -48,7 +106,7 @@ def complete_missing(configuration_list):
         tmp = input("nick: ")
 
         if check(tmp, 'nick'):
-            configuration_list['nick'][0] = str.encode(tmp, 'utf-8')
+            configuration_list['nick'][0] = tmp
             configuration_list['nick'][1] = True
 
 
@@ -61,7 +119,7 @@ def complete_missing(configuration_list):
         tmp = input("channel: ")
 
         if check(tmp, 'channel'):
-            configuration_list['channel'][0] = str.encode(tmp, 'utf-8')
+            configuration_list['channel'][0] = tmp
             configuration_list['channel'][1] = True
 
 

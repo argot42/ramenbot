@@ -43,32 +43,32 @@ for option, argument in opts:
         bot_configuration['ssl'][1] = True
 
     elif option in ("-H", "--host"):
-        if check(bot_configuration["host"], "host"):
+        if check(argument, "host"):
             bot_configuration["host"][0] = argument
             bot_configuration["host"][1] = True
 
     elif option in ("-p", "--port"):
-        if check(bot_configuration["port"], "port"):
+        if check(argument, "port"):
             bot_configuration["port"][0] = int(argument)
             bot_configuration["port"][1] = True
 
     elif option in ("-n", "--nick"):
-        if check(bot_configuration["nick"], "nick"):
+        if check(argument, "nick"):
             bot_configuration["nick"][0] = argument
             bot_configuration["nick"][1] = True
 
     elif option in ("-r", "--realname"):
-        if check(bot_configuration["realname"], "realname"):
+        if check(argument, "realname"):
             bot_configuration["realname"][0] = argument
             bot_configuration["realname"][1] = True
 
     elif option in ("-c", "--channel"):
-        if check(bot_configuration["channel"], "channel"):
+        if check(argument, "channel"):
             bot_configuration["channel"][0] = argument
             bot_configuration["channel"][1] = True
 
     elif option in ("-t", "--tellfile"):
-        if check(bot_configuration["tellfile"], "tellfile"):
+        if check(argument, "tellfile"):
             bot_configuration["tellfile"][0] = argument + '/tellfile.db'
             bot_configuration["tellfile"][1] = True
 
