@@ -173,9 +173,9 @@ class Ramen:
 
     def inte(receiver, args):
         if not args[0]:
-            return [Ramen.build_msg(send_to='receiver', body='Needs argument to intensify')]
+            return [Ramen.build_msg(send_to=receiver, body='Needs argument to intensify')]
 
-        return [Ramen.build_msg(send_to=receiver, body='[{0} INTENSIFIES]', fparts=(' '.join(args).upper()))]
+        return [Ramen.build_msg(send_to=receiver, body='[{0} INTENSIFIES]', fparts=(' '.join(args).upper(),))]
 
 
     def log_join(info, users):
