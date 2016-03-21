@@ -95,10 +95,10 @@ class Ramen:
         if not args[0]:
            return [Ramen.build_msg(send_to=receiver, body='List of Commands:'),\
                    Ramen.build_msg(send_to=receiver, body='- help'),\
-                   Ramen.build_msg(send_to=receiver, body='- lastseen'),\
-                   Ramen.build_msg(send_to=receiver, body='- tell'),\
-                   Ramen.build_msg(send_to=receiver, body='- src'),\
                    Ramen.build_msg(send_to=receiver, body='- int'),\
+                   Ramen.build_msg(send_to=receiver, body='- lastseen'),\
+                   Ramen.build_msg(send_to=receiver, body='- src'),\
+                   Ramen.build_msg(send_to=receiver, body='- tell'),\
                    Ramen.build_msg(send_to=receiver, body='- weather'),\
                    Ramen.build_msg(send_to=receiver, body='- wiki'),\
                    Ramen.build_msg(send_to=receiver, body='Try .help <command_name> to check command\'s syntax')]
