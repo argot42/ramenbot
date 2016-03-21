@@ -121,7 +121,7 @@ class Ramen:
             return [Ramen.build_msg(send_to=receiver, body='.int <somthing>: Intesifies something')]
 
         elif args[0] == 'weather':
-            return [Ramen.build_msg(send_to=receiver, body='.weather <city>, <region>, [<country>], [<unit>]: Tells you the climate in that region')]
+            return [Ramen.build_msg(send_to=receiver, body='.weather <city>, <region>, [<country>] :[<unit>]: Tells you the climate in that region')]
 
         elif args[0] == 'wiki':
             return [Ramen.build_msg(send_to=receiver, body='.wiki <something>: Looks something up in wikipedia')]
