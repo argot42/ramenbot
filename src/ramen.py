@@ -291,7 +291,7 @@ class Ramen:
             return [Ramen.build_msg(send_to=receiver, body='No article found')]
 
         else:
-            return [Ramen.build_msg(send_to=receiver, body='{0}', fparts=(item[1]['canonicalurl']))]
+            return [Ramen.build_msg(send_to=receiver, body=item[1]['canonicalurl']]
 
 
     def build_msg(send_to='', body='', msg_type='PRIVMSG', fparts=()):
