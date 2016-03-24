@@ -50,7 +50,7 @@ class Ramen:
     def resolv_com(info, nick, receiver, com):
         # obtain command name
         print("COM->",com)
-        matched = re.match(r'\.(?P<com_id>\w+)(?P<args>(?: (?:\S+))*)', com)
+        matched = re.match(r'\.(?P<com_id>\w+)(?P<args>(?: +(?:\S+))*)', com)
 
         # if it dosn't match a command check for stored msgs
         # yeah this is fucking messy but fuck you i'm tired
@@ -64,6 +64,7 @@ class Ramen:
 
         comid = matched.group('com_id')
         args = matched.group('args')[1:].split(' ')
+        args = [x for x in args if x != '']
 
         # check command and respond adequately
         if comid == 'help':
@@ -87,20 +88,24 @@ class Ramen:
         elif comid == 'wiki':
             return Ramen.wiki(receiver, args)
 
+        elif comid == 'stats':
+            return Ramen.stats(receiver, args, info['tellfile'])
+
         else:
             return None
 
 
     def help(info, nick, receiver, args):
-        if not args[0]:
+        if not args:
            return [Ramen.build_msg(send_to=receiver, body='List of Commands:'),\
-                   Ramen.build_msg(send_to=receiver, body='- help'),\
-                   Ramen.build_msg(send_to=receiver, body='- int'),\
-                   Ramen.build_msg(send_to=receiver, body='- lastseen'),\
-                   Ramen.build_msg(send_to=receiver, body='- src'),\
-                   Ramen.build_msg(send_to=receiver, body='- tell'),\
-                   Ramen.build_msg(send_to=receiver, body='- weather'),\
-                   Ramen.build_msg(send_to=receiver, body='- wiki'),\
+                   Ramen.build_msg(send_to=receiver, body='~ help ~ int ~ lastseen ~ stats ~ src ~ tell ~ weather ~ wiki ~'),\
+                  # Ramen.build_msg(send_to=receiver, body='- autism'),\
+                  # Ramen.build_msg(send_to=receiver, body='- int'),\
+                  # Ramen.build_msg(send_to=receiver, body='- lastseen'),\
+                  # Ramen.build_msg(send_to=receiver, body='- src'),\
+                  # Ramen.build_msg(send_to=receiver, body='- tell'),\
+                  # Ramen.build_msg(send_to=receiver, body='- weather'),\
+                  # Ramen.build_msg(send_to=receiver, body='- wiki'),\
                    Ramen.build_msg(send_to=receiver, body='Try .help <command_name> to check command\'s syntax')]
                    
 
@@ -108,11 +113,11 @@ class Ramen:
             return [Ramen.build_msg(send_to=receiver, body='.help [command]: shows command sintax or, without arguments, the list of commands')]
 
         elif args[0] == 'lastseen':
-            return [Ramen.build_msg(send_to=receiver, body='.lastseen <user>: shows timestamp of a user\'s last connection')]
+            return [Ramen.build_msg(send_to=receiver, body='.lastseen <nick>: shows timestamp of an user\'s last connection')]
 
 
         elif args[0] == 'tell':
-            return [Ramen.build_msg(send_to=receiver, body='.tell <user>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel')]
+            return [Ramen.build_msg(send_to=receiver, body='.tell <nick>: leave a message for a disconnected user. he\'ll receive it when he writes again on the channel')]
 
         elif args[0] == 'src':
             return [Ramen.build_msg(send_to=receiver, body='.src: ramenbot is libre baby')]
@@ -121,10 +126,13 @@ class Ramen:
             return [Ramen.build_msg(send_to=receiver, body='.int <somthing>: Intesifies something')]
 
         elif args[0] == 'weather':
-            return [Ramen.build_msg(send_to=receiver, body='.weather <city>, <region>, [<country>] :[<unit>]: Tells you the climate in that region')]
+            return [Ramen.build_msg(send_to=receiver, body='.weather <city>, <region>, [country] :[unit]: Tells you the climate in that region')]
 
         elif args[0] == 'wiki':
             return [Ramen.build_msg(send_to=receiver, body='.wiki <something>: Looks something up in wikipedia')]
+
+        elif args[0] == 'stats':
+            return [Ramen.build_msg(send_to=receiver, body='.stats <nick>, [autism|cozy] [<+,-><1,2,3>]: Increase, decrease or check autism/cozyness level of an user')]
 
 
     def source(info, nick, receiver):
@@ -132,7 +140,7 @@ class Ramen:
 
 
     def tell(info, nick, receiver, args):
-        if not args[0]:
+        if not args:
             return [Ramen.build_msg(send_to=receiver, body='Try .help tell')]
         elif len(args) < 1:
             return [Ramen.build_msg(send_to=receiver, body='The msg need a body')]
@@ -154,7 +162,7 @@ class Ramen:
             return [Ramen.build_msg(send_to=receiver, body='The msg will be delivered :3')]
 
     def lastseen(info, nick, receiver, args):
-        if not args[0]:
+        if not args:
             return [Ramen.build_msg(send_to=receiver, body='Baka, this command needs a valid nick as argument')]
 
         chop = Chopsticks(info['tellfile'])
@@ -172,7 +180,7 @@ class Ramen:
 
 
     def inte(receiver, args):
-        if not args[0]:
+        if not args:
             return [Ramen.build_msg(send_to=receiver, body='Needs argument to intensify')]
 
         return [Ramen.build_msg(send_to=receiver, body='[{0} INTENSIFIES]', fparts=(' '.join(args).upper(),))]
@@ -184,7 +192,7 @@ class Ramen:
         timest = datetime.datetime.timestamp(datetime.datetime.utcnow())
         usr_tupl = tuple()
         for user in users:
-            usr_tupl += ((user, timest),)
+            usr_tupl += ((user, timest, 0, 0),)
 
         chop.userub(usr_tupl) 
 
@@ -232,7 +240,7 @@ class Ramen:
 
 
     def parse_weather(args):
-        if not args[0]:
+        if not args:
             raise RuntimeError('no_arguments', 'You must provide arguments for this command')
 
         # [[city], [region], [country]*, [unit]*]
@@ -273,7 +281,7 @@ class Ramen:
 
 
     def wiki(receiver, args):
-        if not args[0]:
+        if not args:
             return [Ramen.build_msg(send_to=receiver, body='This commands needs at least one argument')]
 
         # set up search
@@ -291,8 +299,61 @@ class Ramen:
             return [Ramen.build_msg(send_to=receiver, body='No article found')]
 
         else:
-            return [Ramen.build_msg(send_to=receiver, body=item[1]['canonicalurl']]
+            return [Ramen.build_msg(send_to=receiver, body=item[1]['canonicalurl'])]
 
+
+    def stats(receiver, args, tellfile):
+        if not args:
+            return [Ramen.build_msg(send_to=receiver, body='This command needs a nick as argument')]
+
+        nick = args[0]
+        attr = args[1:]
+        chop = Chopsticks(tellfile) 
+
+        # no increments suplied
+        if not attr:
+            userinfo = chop.userstats(nick)
+            # not nickname in database
+            if not userinfo:
+                return [Ramen.build_msg(send_to=receiver, body='No user stored with that nickname')]
+
+            return [Ramen.build_msg(send_to=receiver, body='[{0}] autism: {1} cozyness: {2}', fparts=(nick, userinfo[0], userinfo[1]))]
+
+        dto = {'autism': None, 'cozy': None}
+        count = 0
+        userinfo_q = len(attr)
+
+        if userinfo_q % 2 != 0:
+            return [Ramen.build_msg(send_to=receiver, body='Argument error')]
+
+        while count < userinfo_q:
+            try:
+                dto[attr[count]] = Ramen.statconvert(attr[count+1])
+            except KeyError:
+                pass
+            except RuntimeError as err:
+                pass
+            
+            count += 2
+        
+        try:
+            update = chop.statsupdate(nick, dto)
+        except RuntimeError as err:
+            if err.args[0] == 'empty_dto':
+                return [Ramen.build_msg(send_to=receiver, body='Argument error')]
+
+        return [Ramen.build_msg(send_to=receiver, body='[{0}] autism: {1} cozyness: {2}', fparts=(nick, update['autism'], update['cozy']))]
+
+
+    def statconvert(stat):
+        if len(stat) != 2:
+            raise RuntimeError('invalid_form')
+
+        if not stat[0] in ['-','+'] or not stat[1] in ['1','2','3']:
+            raise RuntimeError('invalid_stat')
+        
+        return int(stat)
+                
 
     def build_msg(send_to='', body='', msg_type='PRIVMSG', fparts=()):
         header_content = [msg_type]

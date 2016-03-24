@@ -30,7 +30,16 @@ class Chopsticks:
 
         with conn:
             cur = conn.cursor()
-            cur.executemany('INSERT OR REPLACE INTO user VALUES(?, ?)', user_tuple)
+
+            try:
+                cur.executemany('INSERT INTO user VALUES(?, ?, ?, ?)', user_tuple)
+
+            except sqlite3.IntegrityError:
+                new_tuple = tuple()
+                for user in user_tuple:
+                    new_tuple += ((user[1], user[0]),)
+
+                cur.executemany('UPDATE user SET lastseen=? WHERE nickname=?', new_tuple)
 
 
     def user_rts(self, nickname):
@@ -73,3 +82,49 @@ class Chopsticks:
             cur.execute('DELETE FROM msg WHERE receiver_id=?', (receiver,))
 
         return msgs
+
+
+    def userstats(self, nick):
+        conn = sqlite3.connect(self.path)
+
+        with conn:
+            cur = conn.cursor()
+
+            cur.execute('SELECT cozy,autism FROM user WHERE nickname=?', (nick,))
+            stats = cur.fetchone()
+
+        return stats
+
+
+    def statsupdate(self, nick, dto):
+        # checking that dto is not empty
+        count = 0
+        for v in dto:
+            if not dto[v]:
+                count += 1
+
+        if count == len(dto):
+            raise RuntimeError('empty_dto')
+
+
+        conn = sqlite3.connect(self.path)
+        
+        with conn:
+            cur = conn.cursor()
+            
+            cur.execute('SELECT cozy,autism FROM user WHERE nickname=?', (nick,))
+            stats = cur.fetchone()
+
+            if not dto['cozy']:
+                dto['cozy'] = stats[0]
+            else:
+                dto['cozy'] += stats[0]
+
+            if not dto['autism']:
+                dto['autism'] = stats[1]
+            else:
+                dto['autism'] += stats[1]
+
+            cur.execute('UPDATE user SET cozy=?,autism=? WHERE nickname=?', (dto['cozy'], dto['autism'], nick))
+
+        return dto
